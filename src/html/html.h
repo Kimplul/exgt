@@ -1,6 +1,8 @@
 #ifndef EXGT_HTML_H
 #define EXGT_HTML_H
 
+#include <stdio.h>
+
 /** Linked list of html attributes. */
 struct html_attr {
 	/** Name of attribute. */
@@ -69,7 +71,7 @@ void html_append_elem(struct html_elem *prev, struct html_elem *next);
 /**
  * Add element with specified values to element.
  *
- * @param elem Element to append after.
+ * @param prev Element to append after.
  * @param tag Tag of new element.
  * @param value Value of new element.
  * @return New element.
@@ -101,9 +103,10 @@ struct html_elem *html_add_child(struct html_elem *parent, const char *tag,
 /**
  * Print out html.
  *
+ * @param file File to print to.
  * @param elem Tree of html element nodes.
  */
-void html_print(struct html_elem *elem);
+void html_print(FILE *file, struct html_elem *elem);
 
 /**
  * Helper function for creating an attribute.
@@ -131,5 +134,8 @@ struct html_elem *html_create_elem(const char *tag, const char *value);
  * @param elem Element to free (probably root of HTML).
  */
 void html_destroy(struct html_elem *elem);
+
+/** Generate html document. */
+void html_serve();
 
 #endif /* EXGT_HTML_H */

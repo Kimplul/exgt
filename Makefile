@@ -31,6 +31,10 @@ format:
 	find . -iname '*.[ch]' |\
 		xargs -n 10 -P 0 uncrustify -c uncrustify.conf --no-backup -F -
 
+.PHONY: license
+license:
+	./scripts/license
+
 .PHONY: docs
 docs:
 	./scripts/warn-undocumented
@@ -41,4 +45,8 @@ exgt: $(OBJS)
 
 .PHONY: clean
 clean:
-	$(RM) -r build exgt deps.mk docs/output
+	$(RM) -r build exgt deps.mk
+
+.PHONY: clean_docs
+clean_docs:
+	$(RM) -r docs/output

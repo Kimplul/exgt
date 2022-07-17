@@ -1,50 +1,55 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <assert.h>
+
+#include <utils/path.h>
+
+#include "pages/pages.h"
 #include "html.h"
 
-static void html_print_attr(struct html_attr *attr)
+static void html_print_attr(FILE *file, struct html_attr *attr)
 {
 	if (attr->value)
-		printf(" %s=\"%s\"", attr->name, attr->value);
+		fprintf(file, " %s=\"%s\"", attr->name, attr->value);
 	else
-		printf(" %s", attr->name);
+		fprintf(file, " %s", attr->name);
 }
 
-static void html_print_attrs(struct html_attr *attr)
+static void html_print_attrs(FILE *file, struct html_attr *attr)
 {
 	for (; attr; attr = attr->prev)
-		html_print_attr(attr);
+		html_print_attr(file, attr);
 }
 
-static void html_print_starttag(struct html_elem *elem)
+static void html_print_starttag(FILE *file, struct html_elem *elem)
 {
 	if (elem->tag) {
-		printf("<%s", elem->tag);
-		html_print_attrs(elem->attrs);
-		puts(">");
+		fprintf(file, "<%s", elem->tag);
+		html_print_attrs(file, elem->attrs);
+		fprintf(file, ">\n");
 	}
 }
 
-static void html_print_endtag(struct html_elem *elem)
+static void html_print_endtag(FILE *file, struct html_elem *elem)
 {
 	if (elem->tag)
-		printf("</%s>\n", elem->tag);
+		fprintf(file, "</%s>\n", elem->tag);
 }
 
-static void html_print_elem(struct html_elem *elem)
+static void html_print_elem(FILE *file, struct html_elem *elem)
 {
-	html_print_starttag(elem);
-	puts(elem->value);
-	html_print(elem->child);
-	html_print_endtag(elem);
+	html_print_starttag(file, elem);
+	fprintf(file, elem->value);
+	html_print(file, elem->child);
+	html_print_endtag(file, elem);
 }
 
-void html_print(struct html_elem *elem)
+void html_print(FILE *file, struct html_elem *elem)
 {
 	for (; elem; elem = elem->next)
-		html_print_elem(elem);
+		html_print_elem(file, elem);
 }
 
 struct html_attr *html_create_attr(const char *name, const char *value)
@@ -125,4 +130,69 @@ void html_destroy(struct html_elem *elem)
 		free(elem);
 		elem = tmp;
 	}
+}
+
+void real_serve(FILE *file, const char *path)
+{
+	char *root = getenv("GIT_PROJECT_ROOT");
+	if (!root) {
+		fprintf(stderr, "GIT_PROJECT_ROOT missing\n");
+		error_serve(file, 500, "GIT_PROJECT_ROOT missing\n");
+		return;
+	}
+
+	char *full_path = build_path(root, path);
+	struct stat sb;
+	if (stat(full_path, &sb)) {
+		perror("stat failed");
+		error_serve(file, 404,
+		            "File or directory could not be found\n");
+		goto out;
+	}
+
+	switch (sb.st_mode & S_IFMT) {
+	case S_IFDIR: dir_serve(file); break;
+	case S_IFREG: file_serve(file); break;
+	}
+
+out:
+	free(full_path);
+}
+
+void unreal_serve(FILE *file, const char *path)
+{
+	if (strcmp(path, "/") == 0)
+		index_serve(file);
+}
+
+void html_serve()
+{
+
+	char *buf;
+	size_t size;
+	FILE *file = open_memstream(&buf, &size);
+	if (!file) {
+		perror("open_memstream failed");
+		return;
+	}
+
+	char *path = getenv("PATH_INFO");
+	if (!path) {
+		fprintf(stderr, "PATH_INFO missing\n");
+		error_serve(file, 500, "PATH_INFO missing\n");
+		goto out;
+	}
+
+	/** @todo utf8? */
+	if (strcmp(path, "/exgt") == 0)
+		/* skip /exgt part of path */
+		real_serve(file, path + 5);
+	else
+		unreal_serve(file, path);
+
+out:
+	/* print file buffer content to server */
+	fclose(file);
+	fputs(buf, stdout);
+	free(buf);
 }

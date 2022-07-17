@@ -1,11 +1,28 @@
 #include <stdio.h>
-#include <html/html.h>
+
+#include "css/css.h"
+#include "html/html.h"
+#include "utils/http.h"
+
+static void serve()
+{
+	enum http_type ht = http_request_type();
+	switch (ht) {
+	case TEXT_HTML:
+		html_serve();
+		break;
+
+	case TEXT_CSS:
+		css_serve();
+		break;
+
+	default:
+		http_status(stdout, 406);
+		break;
+	}
+}
 
 int main()
 {
-	struct html_elem *p = html_create_elem("p",
-	                                       "This is my text, is this better?");
-	html_add_attr(p, "class", "dickbutt");
-	html_print(p);
-	html_destroy(p);
+	serve();
 }
