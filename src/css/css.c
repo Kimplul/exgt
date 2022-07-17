@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file css.c
+ * CSS generation implementation main file.
+ */
+
 #include <stdio.h>
 
 void css_serve()

@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file html.h
+ * HTML generation header.
+ */
+
 #ifndef EXGT_HTML_H
 #define EXGT_HTML_H
 

@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file error.c
+ * Error page generator.
+ */
+
 #include <unistd.h>
 
 #include <html/html.h>

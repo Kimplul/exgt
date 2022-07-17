@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file res.h
+ * Simple resource manager header.
+ */
+
 #ifndef EXGT_RES_H
 #define EXGT_RES_H
 

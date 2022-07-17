@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file http.c
+ * HTTP helper implementation.
+ */
+
 #include <string.h>
 #include <stdlib.h>
 

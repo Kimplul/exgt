@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file pages.h
+ * Exposes different page generators.
+ */
+
 #ifndef EXGT_PAGES_H
 #define EXGT_PAGES_H
 
@@ -8,18 +13,31 @@
 /**
  * Serve error page.
  *
+ * @param file Output file to write to.
  * @param code Status code.
  * @param msg Error message.
  */
 void error_serve(FILE *file, int code, const char *msg);
 
-/** Serve landing page. */
+/**
+ * Serve landing page.
+ *
+ * @param file Output file to write to.
+ */
 void index_serve(FILE *file);
 
-/** Serve one file page. */
+/**
+ * Serve one file page.
+ *
+ * @param file Output file to write to.
+ */
 void file_serve(FILE *file);
 
-/** Serve one directory page. */
+/**
+ * Serve one directory page.
+ *
+ * @param file Output file to write to.
+ */
 void dir_serve(FILE *file);
 
 /* Not entirely sure which features I want to implement, but here are a few

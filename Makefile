@@ -28,26 +28,26 @@ include deps.mk
 
 .PHONY: format
 format:
-	find . -iname '*.[ch]' |\
+	@find . -iname '*.[ch]' |\
 		xargs -n 10 -P 0 uncrustify -c uncrustify.conf --no-backup -F -
 
 .PHONY: license
 license:
-	find . -iname '*.[ch]' |\
+	@find . -iname '*.[ch]' |\
 		xargs -n 10 -P 0 ./scripts/license
 
 .PHONY: docs
 docs:
-	./scripts/warn-undocumented
-	doxygen docs/doxygen.conf
+	@./scripts/warn-undocumented
+	@doxygen docs/doxygen.conf
 
 exgt: $(OBJS)
 	$(COMPILE) $(OBJS) -o $@
 
 .PHONY: clean
 clean:
-	$(RM) -r build exgt deps.mk
+	@$(RM) -r build exgt deps.mk
 
 .PHONY: clean_docs
 clean_docs:
-	$(RM) -r docs/output
+	@$(RM) -r docs/output

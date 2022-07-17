@@ -1,9 +1,20 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file res.c
+ * Simple resource manager implementation.
+ */
+
 #include <stdint.h>
 #include <stdlib.h>
 #include "res.h"
 
+/**
+ * Grow resource manager buffer.
+ * Doubles every call.
+ *
+ * @param r Resource manager to expand.
+ */
 static void res_expand(struct res *r)
 {
 	r->max *= 2;

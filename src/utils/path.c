@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file path.c
+ * Path handling helper implementations.
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include "path.h"

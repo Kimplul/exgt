@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file html.c
+ * HTML generation implementation.
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -11,6 +16,12 @@
 #include "pages/pages.h"
 #include "html.h"
 
+/**
+ * Print one html attribute.
+ *
+ * @param file Output file to print to.
+ * @param attr Attribute to print.
+ */
 static void html_print_attr(FILE *file, struct html_attr *attr)
 {
 	if (attr->value)
@@ -19,12 +30,25 @@ static void html_print_attr(FILE *file, struct html_attr *attr)
 		fprintf(file, " %s", attr->name);
 }
 
+/**
+ * Print html element attributes.
+ *
+ * @param file Output file to print to.
+ * @param attr Attributes to print.
+ */
 static void html_print_attrs(FILE *file, struct html_attr *attr)
 {
 	for (; attr; attr = attr->prev)
 		html_print_attr(file, attr);
 }
 
+/**
+ * Print start tag, stuff like <p> etc.
+ * If element is just raw text, no tag will be printed.
+ *
+ * @param file Output file to print to.
+ * @param elem Element whose start tag to print.
+ */
 static void html_print_starttag(FILE *file, struct html_elem *elem)
 {
 	if (elem->tag) {
@@ -34,12 +58,25 @@ static void html_print_starttag(FILE *file, struct html_elem *elem)
 	}
 }
 
+/**
+ * Print end tag, stuff like </p> etc.
+ * If element is raw text, no tag will be printed.
+ *
+ * @param file Output file to print to.
+ * @param elem Element whose end tag to print.
+ */
 static void html_print_endtag(FILE *file, struct html_elem *elem)
 {
 	if (elem->tag)
 		fprintf(file, "</%s>\n", elem->tag);
 }
 
+/**
+ * Print one HTML element.
+ *
+ * @param file Output file to print to.
+ * @param elem Element to print.
+ */
 static void html_print_elem(FILE *file, struct html_elem *elem)
 {
 	html_print_starttag(file, elem);
@@ -113,6 +150,11 @@ struct html_elem *html_add_child(struct html_elem *parent, const char *tag,
 	return elem;
 }
 
+/**
+ * Destroy element attribues.
+ *
+ * @param attr Start of attribute list.
+ */
 static void html_attrs_destroy(struct html_attr *attr)
 {
 	while (attr) {
@@ -134,7 +176,13 @@ void html_destroy(struct html_elem *elem)
 	}
 }
 
-void real_serve(FILE *file, const char *path)
+/**
+ * Serve page that is based on a "real" file in some repo.
+ *
+ * @param file Output file to print to.
+ * @param path Path to file relative to \c GIT_PROJECT_ROOT.
+ */
+static void real_serve(FILE *file, const char *path)
 {
 	char *root = getenv("GIT_PROJECT_ROOT");
 	if (!root) {
@@ -161,7 +209,15 @@ out:
 	free(full_path);
 }
 
-void unreal_serve(FILE *file, const char *path)
+/**
+ * Serve page that is not based on "real" files.
+ * Currently only the index page, but eventually probably other pages like git
+ * log or git commit or whatever.
+ *
+ * @param file Output file to print to.
+ * @param path URI path not strictly related to any actual disk location.
+ */
+static void unreal_serve(FILE *file, const char *path)
 {
 	if (strcmp(path, "/") == 0)
 		index_serve(file);

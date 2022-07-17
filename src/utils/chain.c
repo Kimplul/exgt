@@ -1,14 +1,20 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 
+/**
+ * @file chain.c
+ * Process pipe chaining implementation.
+ */
+
 #include <spawn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "chain.h"
 
+/** Environment pointer. Weird that you have to manually define but eh. */
 extern char **environ;
 
-int exgt_chain(size_t n, char **cmds[])
+FILE *exgt_chain(size_t n, char **cmds[])
 {
 	int out = 0;
 	int cout_pipe[2];
@@ -45,5 +51,5 @@ int exgt_chain(size_t n, char **cmds[])
 		out = cout_pipe[0];
 	}
 
-	return out;
+	return fdopen(out, "r");
 }
