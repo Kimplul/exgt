@@ -33,7 +33,8 @@ format:
 
 .PHONY: license
 license:
-	./scripts/license
+	find . -iname '*.[ch]' |\
+		xargs -n 10 -P 0 ./scripts/license
 
 .PHONY: docs
 docs:
