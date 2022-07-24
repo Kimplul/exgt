@@ -54,7 +54,7 @@ static void html_print_starttag(FILE *file, struct html_elem *elem)
 	if (elem->tag) {
 		fprintf(file, "<%s", elem->tag);
 		html_print_attrs(file, elem->attrs);
-		fprintf(file, ">\n");
+		fprintf(file, ">");
 	}
 }
 
@@ -80,7 +80,15 @@ static void html_print_endtag(FILE *file, struct html_elem *elem)
 static void html_print_elem(FILE *file, struct html_elem *elem)
 {
 	html_print_starttag(file, elem);
-	fprintf(file, elem->value);
+
+	/* slightly more readable output, though newlines generally speaking
+	 * aren't necessary. */
+	if (elem->value)
+		fprintf(file, "\n%s", elem->value);
+
+	if (elem->child)
+		fprintf(file, "\n");
+
 	html_print(file, elem->child);
 	html_print_endtag(file, elem);
 }

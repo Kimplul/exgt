@@ -9,6 +9,7 @@
 #define EXGT_PAGES_H
 
 #include <stdio.h>
+#include <html/html.h>
 
 /**
  * Serve error page.
@@ -48,6 +49,34 @@ void dir_serve(FILE *file);
  * void commit_serve();
  * void hist_serve();
  * void wiki_serve();
+ * void blame_serve();
+ * void raw_serve();
  */
+
+/* Common functions to all pages */
+
+/**
+ * Generate page header.
+ *
+ * @param html Root html tag.
+ * @param page_title Title of page.
+ * @return Pointer to head tag element.
+ */
+struct html_elem *pages_generate_head(struct html_elem *html,
+                                      const char *page_title);
+
+/**
+ * Generate page header.
+ *
+ * @param body Body tag.
+ * @param search_text Text to be inserted into search box.
+ * @param cont If not \c NULL, place search element node into this address.
+ * Allows use to continue appending elements to header from some higher level
+ * function.
+ * @return Pointer to header tag element.
+ */
+struct html_elem *pages_generate_header(struct html_elem *body,
+                                        const char *search_text,
+                                        struct html_elem **cont);
 
 #endif /* EXGT_PAGES_H */

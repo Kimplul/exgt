@@ -29,8 +29,10 @@ void http_header(FILE *f, int code, const char *type)
 enum http_type http_request_type()
 {
 	char *accept = getenv("HTTP_ACCEPT");
-	if (!accept)
+	if (!accept) {
+		fprintf(stderr, "couldn't find HTTP_ACCEPT\n");
 		return OTHER;
+	}
 
 	if (strstr(accept, "text/html"))
 		return TEXT_HTML;
@@ -38,5 +40,6 @@ enum http_type http_request_type()
 	if (strstr(accept, "text/css"))
 		return TEXT_CSS;
 
+	fprintf(stderr, "missing acceptable format: %s\n", accept);
 	return OTHER;
 }

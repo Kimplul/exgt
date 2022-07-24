@@ -20,6 +20,8 @@ void error_serve(FILE *file, int code, const char *msg)
 		return;
 	}
 
+	fprintf(stderr, "reporting error: %s\n", msg);
+
 	/* set file length to zero, essentially erase whole file */
 	ftruncate(fileno(file), 0);
 
