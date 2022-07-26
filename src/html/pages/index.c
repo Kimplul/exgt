@@ -8,6 +8,7 @@
 #include <stdbool.h>
 
 #include <utils/http.h>
+#include <utils/error.h>
 
 #include "pages.h"
 
@@ -176,34 +177,11 @@ static struct html_elem *generate_main(struct html_elem *index_main)
 void index_serve(FILE *file)
 {
 	http_header(file, 200, "text/html");
-
-	struct html_elem *html;
-	if (!(html = html_create_elem("html", NULL))) {
-		error_serve(file, 500, "couldn't create index html tag");
-		return;
-	}
-
-	struct html_elem *head;
-	if (!(head = pages_generate_head(html, "Index\n"))) {
-		error_serve(file, 500, "couldn't create index head");
-		goto out;
-	}
-
-	struct html_elem *body;
-	if (!(body = html_add_elem(head, "body", NULL))) {
-		error_serve(file, 500, "couldn't create index body");
-		goto out;
-	}
-
-	struct html_elem *header;
-	if (!(header = pages_generate_header(body, "Search projects", NULL))) {
-		error_serve(file, 500, "couldn't create index header");
-		goto out;
-	}
-
-	struct html_elem *index_main;
-	if (!(index_main = html_add_elem(header, "main", NULL))) {
-		error_serve(file, 500, "couldn't create index main");
+	pages_generate_doctype(file);
+	struct html_elem *html, *index_main;
+	if (!(html = pages_generate_common("Index\n", "Search projects",
+	                                   &index_main, NULL))) {
+		error_serve(file, 500, "error serving index\n");
 		goto out;
 	}
 

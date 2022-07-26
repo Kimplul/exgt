@@ -9,6 +9,7 @@
 
 #include <html/html.h>
 #include <utils/http.h>
+#include <utils/error.h>
 
 #include "pages.h"
 
@@ -16,11 +17,11 @@ void error_serve(FILE *file, int code, const char *msg)
 {
 	static int loop = 0;
 	if (loop++) {
-		fprintf(stderr, "error loop detected, aborting\n");
+		error("error loop detected, aborting\n");
 		return;
 	}
 
-	fprintf(stderr, "reporting error: %s\n", msg);
+	error("reporting error: %s\n", msg);
 
 	/* set file length to zero, essentially erase whole file */
 	ftruncate(fileno(file), 0);

@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <html/html.h>
+#include <utils/res.h>
 
 /**
  * Serve error page.
@@ -78,5 +79,36 @@ struct html_elem *pages_generate_head(struct html_elem *html,
 struct html_elem *pages_generate_header(struct html_elem *body,
                                         const char *search_text,
                                         struct html_elem **cont);
+
+/**
+ * Generate common elements of all pages.
+ *
+ * @param title Title of page.
+ * @param search Search box placeholder value.
+ * @param page_main Pointer where to place main element.
+ * @param page_header Pointer where to place header element.
+ * @return \c html element.
+ */
+struct html_elem *pages_generate_common(const char *title,
+                                        const char *search,
+                                        struct html_elem **page_main,
+                                        struct html_elem **page_header);
+
+/**
+ * Generate path for page.
+ *
+ * @param page_main Parent main element.
+ * @param r Resource manager.
+ * @return Path element.
+ */
+struct html_elem *pages_generate_path(struct html_elem *page_main,
+                                      struct res *r);
+
+/**
+ * Generate doctype for html page.
+ *
+ * @param file File to ouput doctype to.
+ */
+void pages_generate_doctype(FILE *file);
 
 #endif /* EXGT_PAGES_H */

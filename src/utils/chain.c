@@ -44,6 +44,8 @@ FILE *exgt_chain(size_t n, char **cmds[])
 			exit(1);
 		}
 
+		posix_spawn_file_actions_destroy(&actions);
+
 		if (out)
 			close(out);
 

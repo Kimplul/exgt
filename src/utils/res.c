@@ -31,13 +31,21 @@ struct res *res_create()
 	return r;
 }
 
-void *res_alloc(struct res *r, size_t size)
+void res_add(struct res *r, void *p)
 {
 	if (r->n >= r->max)
 		res_expand(r);
 
-	void *p = malloc(size);
 	r->p[r->n++] = p;
+}
+
+void *res_alloc(struct res *r, size_t size)
+{
+	void *p = malloc(size);
+	if (!p)
+		return NULL;
+
+	res_add(r, p);
 	return p;
 }
 
@@ -46,5 +54,6 @@ void res_destroy(struct res *r)
 	for (size_t i = 0; i < r->n; ++i)
 		free(r->p[i]);
 
+	free(r->p);
 	free(r);
 }

@@ -37,6 +37,13 @@ struct res *res_create();
  */
 void *res_alloc(struct res *r, size_t size);
 
+/**
+ * Add already alloced pointer to manager.
+ *
+ * @param r Resource manager.
+ * @param p Pointer to manage.
+ */
+void res_add(struct res *r, void *p);
 
 /**
  * Destroy resource manager and free all associated allocations.

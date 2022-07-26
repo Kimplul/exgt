@@ -4,8 +4,14 @@
  * Header, footer, etc.
  */
 
-#include <stddef.h>
 #include <html/html.h>
+#include <utils/error.h>
+#include <utils/git.h>
+#include <html/pages/pages.h>
+
+#include <stddef.h>
+#include <string.h>
+#include <stdlib.h>
 
 struct html_elem *pages_generate_head(struct html_elem *html,
                                       const char *page_title)
@@ -45,4 +51,94 @@ struct html_elem *pages_generate_header(struct html_elem *body,
 		*cont = search;
 
 	return header;
+}
+
+struct html_elem *pages_generate_common(const char *title, const char *search,
+                                        struct html_elem **page_main,
+                                        struct html_elem **page_header)
+{
+	/* normally I don't use C89 style initialization, but lto gives a
+	 * warning about possibly uninitialized variables if I use my typical
+	 * style. */
+	struct html_elem *html = NULL;
+	struct html_elem *head = NULL;
+	struct html_elem *body = NULL;
+	struct html_elem *elem_header = NULL;
+	struct html_elem *elem_main = NULL;
+
+	if (!(html = html_create_elem("html", NULL))) {
+		error("couldn't create html");
+		return NULL;
+	}
+
+	if (!(head = pages_generate_head(html, title))) {
+		error("couldn't create head");
+		goto out;
+	}
+
+	if (!(body = html_add_elem(head, "body", NULL))) {
+		error("couldn't create body");
+		goto out;
+	}
+
+	if (!(elem_header = pages_generate_header(body, search, NULL))) {
+		error("couldn't create header");
+		goto out;
+	}
+
+	if (!(elem_main = html_add_elem(elem_header, "main", NULL))) {
+		error("couldn't create main");
+		goto out;
+	}
+
+out:
+	if (page_main)
+		*page_main = elem_main;
+
+	if (page_header)
+		*page_header = elem_header;
+
+	return html;
+}
+
+struct html_elem *pages_generate_path(struct html_elem *page_main,
+                                      struct res *r)
+{
+	char *path;
+	if (!(path = git_path()))
+		return NULL;
+
+	struct html_elem *path_div = html_add_child(page_main, "div", NULL);
+	html_add_attr(path_div, "class", "path");
+
+	char *next, *prev = path;
+	struct html_elem *elem = NULL;
+	while ((next = strchr(path, '/'))) {
+		*next++ = 0;
+
+		if (elem)
+			elem = html_add_elem(elem, "a", prev);
+		else
+			elem = html_add_child(path_div, "a", prev);
+
+		char *tmp = strdup(path);
+		html_add_attr(elem, "class", "path-elem hover-underline");
+		html_add_attr(elem, "href", tmp);
+		res_add(r, tmp);
+
+		elem = html_add_elem(elem, "span", "/");
+		html_add_attr(elem, "class", "path-sep");
+
+		*prev = '/';
+		prev = next;
+	}
+
+	free(path);
+
+	return path_div;
+}
+
+void pages_generate_doctype(FILE *file)
+{
+	fprintf(file, "<!DOCTYPE html>\n");
 }

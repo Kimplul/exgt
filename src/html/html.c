@@ -201,6 +201,7 @@ static void real_serve(FILE *file, const char *path)
 
 	char *full_path = build_path(root, path);
 	struct stat sb;
+	/* @todo this won't work if we're in a bare git repo */
 	if (stat(full_path, &sb)) {
 		perror("stat failed");
 		error_serve(file, 404,
@@ -250,7 +251,7 @@ void html_serve()
 	}
 
 	/** @todo utf8? */
-	if (strcmp(path, "/exgt") == 0)
+	if (strncmp(path, "/exgt", 5) == 0)
 		/* skip /exgt part of path */
 		real_serve(file, path + 5);
 	else
