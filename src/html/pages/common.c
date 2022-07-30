@@ -6,6 +6,7 @@
 
 #include <html/html.h>
 #include <utils/error.h>
+#include <utils/path.h>
 #include <utils/git.h>
 #include <html/pages/pages.h>
 
@@ -107,33 +108,43 @@ struct html_elem *pages_generate_path(struct html_elem *page_main,
 	char *path;
 	if (!(path = git_path()))
 		return NULL;
+	res_add(r, path);
+
+	char *web_root;
+	if (!(web_root = git_web_root()))
+		return NULL;
+	res_add(r, web_root);
 
 	struct html_elem *path_div = html_add_child(page_main, "div", NULL);
 	html_add_attr(path_div, "class", "path");
 
-	char *next, *prev = path;
-	struct html_elem *elem = NULL;
+	/** @todo make root more obvious and bigger to click on? */
+	struct html_elem *root = html_add_child(path_div, "a", "/");
+	html_add_attr(root, "class", "path-elem hover-underline");
+	html_add_attr(root, "href", web_root);
+
+	char *next, *prev = path, *href = web_root;
+	struct html_elem *elem = root;
 	while ((next = strchr(path, '/'))) {
 		*next++ = 0;
 
-		if (elem)
-			elem = html_add_elem(elem, "a", prev);
-		else
-			elem = html_add_child(path_div, "a", prev);
+		elem = html_add_elem(elem, "a", prev);
 
-		char *tmp = strdup(path);
+		href = build_path(href, prev);
 		html_add_attr(elem, "class", "path-elem hover-underline");
-		html_add_attr(elem, "href", tmp);
-		res_add(r, tmp);
+		html_add_attr(elem, "href", href);
+		res_add(r, href);
 
 		elem = html_add_elem(elem, "span", "/");
 		html_add_attr(elem, "class", "path-sep");
 
-		*prev = '/';
 		prev = next;
 	}
 
-	free(path);
+	if (*prev != 0) {
+		struct html_elem *fname = html_add_elem(elem, "span", prev);
+		html_add_attr(fname, "class", "path-elem");
+	}
 
 	return path_div;
 }

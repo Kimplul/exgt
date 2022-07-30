@@ -81,13 +81,8 @@ static void html_print_elem(FILE *file, struct html_elem *elem)
 {
 	html_print_starttag(file, elem);
 
-	/* slightly more readable output, though newlines generally speaking
-	 * aren't necessary. */
 	if (elem->value)
-		fprintf(file, "\n%s", elem->value);
-
-	if (elem->child)
-		fprintf(file, "\n");
+		fprintf(file, "%s", elem->value);
 
 	html_print(file, elem->child);
 	html_print_endtag(file, elem);

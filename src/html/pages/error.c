@@ -24,6 +24,7 @@ void error_serve(FILE *file, int code, const char *msg)
 	error("reporting error: %s\n", msg);
 
 	/* set file length to zero, essentially erase whole file */
+	/** @todo for some reason the http header is written out twice, why? */
 	ftruncate(fileno(file), 0);
 
 	/* for now, just go with absolute minimum effort. */

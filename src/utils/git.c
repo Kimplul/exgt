@@ -18,24 +18,7 @@ char *git_path()
 	if (!path)
 		return NULL;
 
-	/* /exgt */
-	if (!(path = strchr(path + 1, '/')))
-		return NULL;
-
-	/* project owner name */
-	if (!(path = strchr(path + 1, '/')))
-		return NULL;
-
-	/* git root name */
-	if ((path = strchr(path + 1, '/')))
-		/* actual path */
-		return strdup(path);
-	else
-		/* missing slash means git root */
-		return strdup("");
-
-
-	return NULL;
+	return path_skip_nth(path, 3);
 }
 
 char *git_commit()
@@ -83,22 +66,7 @@ char *git_user_name()
 	if (!(path = getenv("PATH_INFO")))
 		return NULL;
 
-	if (!(path = strchr(path, '/')))
-		return NULL;
-
-	/* skip first slash */
-	if (!(path = strdup(path + 1)))
-		return NULL;
-
-	char *next;
-	if (!(next = strchr(path, '/'))) {
-		free(path);
-		return NULL;
-	}
-
-	*next = 0;
-
-	return path;
+	return path_only_nth(path, 1);
 }
 
 char *git_repo_name()
@@ -107,27 +75,7 @@ char *git_repo_name()
 	if (!(path = getenv("PATH_INFO")))
 		return NULL;
 
-	/* skip /exgt */
-	if (!(path = strchr(path + 1, '/')))
-		return NULL;
-
-	/* skip username */
-	if (!(path = strchr(path + 1, '/')))
-		return NULL;
-
-	/* skip first slash */
-	if (!(path = strdup(path + 1)))
-		return NULL;
-
-	char *next;
-	if (!(next = strchr(path, '/'))) {
-		free(path);
-		return NULL;
-	}
-
-	*next = 0;
-
-	return path;
+	return path_only_nth(path, 2);
 }
 
 char *git_root()
@@ -136,23 +84,18 @@ char *git_root()
 	if (!(path = getenv("PATH_INFO")))
 		return NULL;
 
-	/* skip /exgt */
-	if (!(path = strchr(path + 1, '/')))
+	char *start;
+	if (!(start = path_cut_nth(path, 2)))
 		return NULL;
 
-	if (!(path = strdup(path + 1)))
-		return NULL;
-
-	char *next = path;
-	if (!(next = strchr(next + 1, '/'))) {
-		free(path);
+	char *mid;
+	if (!(mid = path_skip_nth(start, 1))) {
+		free(start);
 		return NULL;
 	}
 
-	if ((next = strchr(next + 1, '/')))
-		*next = 0;
-
-	return path;
+	free(start);
+	return mid;
 }
 
 char *git_real_root()
@@ -172,4 +115,13 @@ char *git_real_root()
 
 	free(root);
 	return path;
+}
+
+char *git_web_root()
+{
+	char *path;
+	if (!(path = getenv("PATH_INFO")))
+		return NULL;
+
+	return path_cut_nth(path, 2);
 }

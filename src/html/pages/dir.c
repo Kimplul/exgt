@@ -18,7 +18,7 @@
 
 #include "pages.h"
 
-/**  Directory generator resource manager. */
+/**  Directory generator resource manager */
 static struct res *r;
 
 /**
@@ -238,23 +238,23 @@ static struct html_elem *generate_dirview(struct html_elem *path, char **readme)
 }
 
 /**
- * Generate pandoc output.
+ * Generate markdown output.
  *
  * @param readme Git object string to README.
- * @return Corresponding pandoc html output.
+ * @return Corresponding markdown html output.
  */
-static char *generate_pandoc(char *readme)
+static char *generate_markdown(char *readme)
 {
 	char *root = git_real_root();
 	char **cmds[] =
 	{(char *[]){"git", "-C", root, "show", readme, 0},
-		/** @todo pandoc correctly determines that a file is .md, need to check
-		 * other formats at some point. */
-	 (char *[]){"pandoc", "-t", "html", 0}};
-	FILE *pandoc = exgt_chain(2, cmds);
+		/* currently uses my fork of discount, include it as a lib? */
+	 (char *[]){"markdown", "-a", "exgt-",
+		    "-ffencedcode,fencedinline,toc,taganchor", 0}};
+	FILE *markdown = exgt_chain(2, cmds);
 	free(root);
 
-	if (!pandoc)
+	if (!markdown)
 		return NULL;
 
 
@@ -263,12 +263,12 @@ static char *generate_pandoc(char *readme)
 	size_t i;
 	size_t buf_size = 64;
 	char *buf = malloc(buf_size);
-	for(i = 0; (c = fgetc(pandoc)) != EOF; ++i) {
+	for(i = 0; (c = fgetc(markdown)) != EOF; ++i) {
 		/* -1 to ensure we always have enough space for a trailing 0. */
 		if (i >= buf_size - 1) {
 			buf = realloc(buf, buf_size *= 2);
 			if (!buf) {
-				fclose(pandoc);
+				fclose(markdown);
 				return NULL;
 			}
 		}
@@ -279,7 +279,7 @@ static char *generate_pandoc(char *readme)
 	/* set trailing 0. */
 	buf[i] = 0;
 
-	fclose(pandoc);
+	fclose(markdown);
 
 	return buf;
 }
@@ -297,13 +297,13 @@ static struct html_elem *generate_readmeview(struct html_elem *dirview,
 	if (!readme)
 		return dirview;
 
-	char *pandoc;
-	if (!(pandoc = generate_pandoc(readme)))
+	char *markdown;
+	if (!(markdown = generate_markdown(readme)))
 		return NULL;
 
-	struct html_elem *readmeview = html_add_elem(dirview, "div", pandoc);
+	struct html_elem *readmeview = html_add_elem(dirview, "div", markdown);
 	html_add_attr(readmeview, "class", "border readmeview");
-	res_add(r, pandoc);
+	res_add(r, markdown);
 
 	return readmeview;
 }
@@ -326,8 +326,10 @@ static struct html_elem *generate_main(struct html_elem *dir_main)
 		return NULL;
 
 	struct html_elem *readmeview;
-	if (!(readmeview = generate_readmeview(dirview, readme)))
+	if (!(readmeview = generate_readmeview(dirview, readme))) {
+		free(readme);
 		return NULL;
+	}
 
 	free(readme);
 
@@ -341,6 +343,7 @@ void dir_serve(FILE *file)
 	http_header(file, 200, "text/html");
 
 	struct html_elem *html, *dir_main;
+	/** @todo set dir name instead of "dir" as title */
 	if (!(html =
 		      pages_generate_common("dir\n", "Search project",
 		                            &dir_main, NULL))) {
@@ -349,7 +352,7 @@ void dir_serve(FILE *file)
 	}
 
 	if (!generate_main(dir_main)) {
-		error_serve(file, 500, "couldn't generate dir main");
+		error_serve(file, 500, "couldn't generate dir main\n");
 		goto out;
 	}
 

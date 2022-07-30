@@ -56,4 +56,12 @@ char *git_object();
  */
 char *git_real_root();
 
+/**
+ * Get git root on web.
+ * @todo should it also contain commit info?
+ *
+ * @return Git root on web, i.e. /exgt/Kimplul/exgt/file.c -> /exgt/Kimplul/exgt
+ */
+char *git_web_root();
+
 #endif /* EXGT_GIT_H */
