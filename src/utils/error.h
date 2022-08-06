@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+
 #ifndef EXGT_ERROR_H
 #define EXGT_ERROR_H
 
