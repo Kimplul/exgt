@@ -21,7 +21,7 @@ FILE *exgt_chain(size_t n, char **cmds[])
 	for (size_t i = 0; i < n; ++i) {
 		if (pipe(cout_pipe)) {
 			perror("pipe failed");
-			exit(1);
+			return NULL;
 		}
 
 		posix_spawn_file_actions_t actions;
@@ -41,7 +41,7 @@ FILE *exgt_chain(size_t n, char **cmds[])
 		if (posix_spawnp(&pid, cmds[i][0], &actions, NULL, cmds[i],
 		                 environ)) {
 			perror("posix_spawnp failed");
-			exit(1);
+			return NULL;
 		}
 
 		posix_spawn_file_actions_destroy(&actions);
