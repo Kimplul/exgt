@@ -223,8 +223,7 @@ out:
  */
 static void unreal_serve(FILE *file, const char *path)
 {
-	if (strcmp(path, "/") == 0)
-		index_serve(file);
+	index_serve(file);
 }
 
 void html_serve()
@@ -246,9 +245,10 @@ void html_serve()
 	}
 
 	/** @todo utf8? */
-	if (strncmp(path, "/exgt", 5) == 0)
-		/* skip /exgt part of path */
-		real_serve(file, path + 5);
+	/** @todo be more exagt, i.e. regex /exgt/? or something */
+	if (strncmp(path, "/exgt/", 7) > 0)
+		/* skip /exgt/ part of path */
+		real_serve(file, path + 6);
 	else
 		unreal_serve(file, path);
 

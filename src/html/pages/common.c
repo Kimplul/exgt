@@ -39,7 +39,7 @@ struct html_elem *pages_generate_header(struct html_elem *body,
 	/** @todo allow user to specify home button text? */
 	struct html_elem *exgt_button = html_add_child(header, "a", "EXGT");
 	html_add_attr(exgt_button, "class", "button");
-	html_add_attr(exgt_button, "href", "/");
+	html_add_attr(exgt_button, "href", "/exgt");
 
 	struct html_elem *user_button = html_add_elem(exgt_button, "a", "User");
 	html_add_attr(user_button, "class", "button");
