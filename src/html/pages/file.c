@@ -128,6 +128,14 @@ static char *generate_syntax(char *object)
 	if (!(suffix = strrchr(object, '.')))
 		return strdup("txt");
 
+	char *prefix;
+	if (!(prefix = strrchr(object, '/')))
+		prefix = strchr(object, ':') + 1;
+
+	/* file is form .name, assume text */
+	if (suffix == prefix)
+		return strdup("txt");
+
 	return strdup(suffix + 1);
 }
 
