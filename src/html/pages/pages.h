@@ -99,9 +99,10 @@ struct html_elem *pages_generate_common(const char *title,
  *
  * @param page_main Parent main element.
  * @param r Resource manager.
+ * @return Clone element.
  */
 struct html_elem *pages_generate_clone(struct html_elem *page_main,
-                                        struct res *r);
+                                       struct res *r);
 
 /**
  * Generate path for page.

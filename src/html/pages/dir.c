@@ -8,6 +8,7 @@
 #include <html/html.h>
 #include <utils/http.h>
 #include <utils/chain.h>
+#include <utils/path.h>
 #include <utils/res.h>
 #include <utils/git.h>
 
@@ -104,21 +105,15 @@ static bool check_readme(char *fname)
  */
 static char *generate_ref_path(char *fname)
 {
-	char *path;
-	if (!(path = git_path()))
+	/* since we already know we're dealing with a dir, the web dir is just
+	 * PATH_INFO. No need to fiddle with parsing a git command or anything. */
+	char *web_dir;
+	if (!(web_dir = getenv("PATH_INFO")))
 		return NULL;
 
 	char *ref;
-	if (!(ref = calloc(1, sizeof(path) + sizeof(fname) + 2))) {
-		free(path);
+	if (!(ref = build_path(web_dir, fname)))
 		return NULL;
-	}
-
-	strcat(ref, path);
-	strcat(ref, "/");
-	strcat(ref, fname);
-
-	free(path);
 
 	return ref;
 }

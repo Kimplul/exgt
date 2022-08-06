@@ -103,12 +103,13 @@ out:
 }
 
 struct html_elem *pages_generate_clone(struct html_elem *page_main,
-		struct res *r)
+                                       struct res *r)
 {
 	struct html_elem *clone = html_add_child(page_main, "div", NULL);
 	html_add_attr(clone, "class", "clone");
 
-	struct html_elem *http_clone = html_add_child(clone, "span", "https://tmp");
+	struct html_elem *http_clone = html_add_child(clone, "span",
+	                                              "https://tmp");
 	html_add_elem(http_clone, "span", "exgt@tmp:tmp");
 	return clone;
 }
