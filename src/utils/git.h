@@ -64,4 +64,11 @@ char *git_real_root();
  */
 char *git_web_root();
 
+/**
+ * Get last element of git web path.
+ *
+ * @return Last element of git path, i.e. /exgt/Kimplul/exgt/file.c -> file.c
+ */
+char *git_web_last();
+
 #endif /* EXGT_GIT_H */

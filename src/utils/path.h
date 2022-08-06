@@ -55,4 +55,16 @@ char *path_only_nth(const char *path, size_t n);
  */
 char *path_cut_nth(const char *path, size_t n);
 
+/**
+ * Get last element int path.
+ *
+ * Example: @code path = /exgt/Kimplul/file.c => file.c @endcode
+ *
+ * If the paht is just '/', '/' is returned.
+ *
+ * @param path Path to extract last element from.
+ * @return Last element of \p path.
+ */
+char *path_last_elem(const char *path);
+
 #endif /* EXGT_PATH_H */

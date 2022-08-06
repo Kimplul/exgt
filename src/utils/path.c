@@ -71,3 +71,18 @@ char *build_path(const char *root, const char *path_info)
 
 	return path;
 }
+
+char *path_last_elem(const char *path)
+{
+	char *slash = strrchr(path, '/');
+
+	/* path contains only one element */
+	if (!slash)
+		return strdup(path);
+
+	/* path is just '/' */
+	if (slash == path)
+		return strdup(path);
+
+	return strdup(slash + 1);
+}

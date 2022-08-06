@@ -222,14 +222,21 @@ static struct html_elem *generate_main(struct html_elem *file_main)
 
 void file_serve(FILE *file)
 {
+	char *title;
+	if (!(title = git_web_last())) {
+		error_serve(file, 500, "couldn't get current git element\n");
+		return;
+	}
+
 	r = res_create();
+	res_add(r, title);
 
 	http_header(file, 200, "text/html");
 
 	struct html_elem *html, *file_main;
 	/** @todo set file name instead of "file" as title */
 	if (!(html =
-		      pages_generate_common("file\n", "Search project",
+		      pages_generate_common(title, "Search project",
 		                            &file_main, NULL))) {
 		error_serve(file, 500, "error serving file\n");
 		goto out;

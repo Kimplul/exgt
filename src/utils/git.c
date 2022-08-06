@@ -125,3 +125,12 @@ char *git_web_root()
 
 	return path_cut_nth(path, 2);
 }
+
+char *git_web_last()
+{
+	char *path;
+	if (!(path = getenv("PATH_INFO")))
+		return NULL;
+
+	return path_last_elem(path);
+}
