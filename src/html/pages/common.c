@@ -24,7 +24,12 @@ struct html_elem *pages_generate_head(struct html_elem *html,
 	struct html_elem *utf8 = html_add_elem(title, "meta", NULL);
 	html_add_attr(utf8, "charset", "utf8");
 
-	struct html_elem *link = html_add_elem(utf8, "link", NULL);
+	struct html_elem *preload = html_add_elem(utf8, "link", NULL);
+	html_add_attr(preload, "rel", "preload");
+	html_add_attr(preload, "href", "styles.css");
+	html_add_attr(preload, "as", "style");
+
+	struct html_elem *link = html_add_elem(preload, "link", NULL);
 	html_add_attr(link, "rel", "stylesheet");
 	html_add_attr(link, "href", "styles.css");
 
