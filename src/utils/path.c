@@ -15,6 +15,10 @@ char *path_skip_nth(const char *path, size_t n)
 		if (!(path = strchr(path + 1, '/')))
 			return NULL;
 
+	/* missing trailing '/' should just be an empty string. */
+	if (!(path = strchr(path + 1, '/')))
+		return strdup("");
+
 	char *path_dup;
 	if (!(path_dup = strdup(path + 1)))
 		return NULL;
@@ -38,9 +42,13 @@ char *path_only_nth(const char *path, size_t n)
 char *path_cut_nth(const char *path, size_t n)
 {
 	const char *orig = path;
-	for (size_t i = 0; i <= n; ++i)
+	for (size_t i = 0; i < n; ++i)
 		if (!(path = strchr(path + 1, '/')))
 			return NULL;
+
+	/* missing trailing '/' should be the string itself*/
+	if (!(path = strchr(path + 1, '/')))
+		return strdup(orig);
 
 	return strndup(orig, path - orig);
 }

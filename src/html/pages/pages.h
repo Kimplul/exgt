@@ -95,13 +95,22 @@ struct html_elem *pages_generate_common(const char *title,
                                         struct html_elem **page_header);
 
 /**
- * Generate path for page.
+ * Generate clone for page.
  *
  * @param page_main Parent main element.
  * @param r Resource manager.
+ */
+struct html_elem *pages_generate_clone(struct html_elem *page_main,
+                                        struct res *r);
+
+/**
+ * Generate path for page.
+ *
+ * @param clone Previous clone element..
+ * @param r Resource manager.
  * @return Path element.
  */
-struct html_elem *pages_generate_path(struct html_elem *page_main,
+struct html_elem *pages_generate_path(struct html_elem *clone,
                                       struct res *r);
 
 /**

@@ -205,8 +205,12 @@ static struct html_elem *generate_fileview(struct html_elem *path)
  */
 static struct html_elem *generate_main(struct html_elem *file_main)
 {
+	struct html_elem *clone;
+	if (!(clone = pages_generate_clone(file_main, r)))
+		return NULL;
+
 	struct html_elem *path;
-	if (!(path = pages_generate_path(file_main, r)))
+	if (!(path = pages_generate_path(clone, r)))
 		return NULL;
 
 	struct html_elem *fileview;

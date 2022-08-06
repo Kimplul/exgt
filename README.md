@@ -17,7 +17,7 @@ I really should try to make a script for this, but here's the bare minimum to
 get the repo to generate a dirview of itself:
 
 ```
-QEURY_STRING= GIT_PROJECT_ROOT=$(pwd)/../.. PATH_INFO=/exgt/Projects/exgt HTTP_ACCEPT=text/html ./exgt
+QUERY_STRING= GIT_PROJECT_ROOT=$(pwd)/../.. PATH_INFO=/exgt/Projects/exgt HTTP_ACCEPT=text/html ./exgt
 ```
 
 In this case, we pretend whatever directory is two levels above is the root of

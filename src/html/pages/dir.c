@@ -287,7 +287,7 @@ static char *generate_markdown(char *readme)
 /**
  * Generate readme view. Nothing is output if directory doesn't contain readme.
  *
- * @param dirview Directory view that readme view should followl
+ * @param dirview Directory view that readme view should follow.
  * @param readme Pointer to git object string or \c null if readme doesn't exist.
  * @return readmeview if readme exists, dirview otherwise.
  */
@@ -316,8 +316,12 @@ static struct html_elem *generate_readmeview(struct html_elem *dirview,
  */
 static struct html_elem *generate_main(struct html_elem *dir_main)
 {
+	struct html_elem *clone;
+	if (!(clone = pages_generate_clone(dir_main, r)))
+		return NULL;
+
 	struct html_elem *path;
-	if (!(path = pages_generate_path(dir_main, r)))
+	if (!(path = pages_generate_path(clone, r)))
 		return NULL;
 
 	char *readme = NULL;

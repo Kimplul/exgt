@@ -18,7 +18,7 @@ char *git_path()
 	if (!path)
 		return NULL;
 
-	return path_skip_nth(path, 3);
+	return path_skip_nth(path, 2);
 }
 
 char *git_commit()
@@ -89,7 +89,7 @@ char *git_root()
 		return NULL;
 
 	char *mid;
-	if (!(mid = path_skip_nth(start, 1))) {
+	if (!(mid = path_skip_nth(start, 0))) {
 		free(start);
 		return NULL;
 	}
