@@ -130,14 +130,20 @@ struct html_elem *pages_generate_path(struct html_elem *clone,
 	struct html_elem *path_div = html_add_elem(clone, "div", NULL);
 	html_add_attr(path_div, "class", "path");
 
-	/** @todo make root more obvious and bigger to click on? */
-	struct html_elem *root = html_add_child(path_div, "a", "/");
+	char *repo_name;
+	if (!(repo_name = git_repo_name()))
+		return NULL;
+	res_add(r, repo_name);
+
+	struct html_elem *root = html_add_child(path_div, "a", repo_name);
 	html_add_attr(root, "class", "path-elem hover-underline");
 	html_add_attr(root, "href", web_root);
 
+	struct html_elem *elem = html_add_elem(root, "span", "/");
+	html_add_attr(elem, "class", "path-sep");
+
 	char *next, *prev = path, *href = web_root;
-	struct html_elem *elem = root;
-	while ((next = strchr(path, '/'))) {
+	while ((next = strchr(prev, '/'))) {
 		*next++ = 0;
 
 		elem = html_add_elem(elem, "a", prev);

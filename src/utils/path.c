@@ -29,7 +29,7 @@ char *path_skip_nth(const char *path, size_t n)
 char *path_only_nth(const char *path, size_t n)
 {
 	char *path_dup;
-	if (!(path_dup = path_skip_nth(path, n)))
+	if (!(path_dup = path_skip_nth(path, n - 1)))
 		return NULL;
 
 	char *slash;
