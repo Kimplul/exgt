@@ -12,6 +12,8 @@
 #include <assert.h>
 
 #include <utils/path.h>
+#include <utils/git.h>
+#include <utils/chain.h>
 
 #include "pages/pages.h"
 #include "html.h"
@@ -183,34 +185,36 @@ void html_destroy(struct html_elem *elem)
  * Serve page that is based on a "real" file in some repo.
  *
  * @param file Output file to print to.
- * @param path Path to file relative to \c GIT_PROJECT_ROOT.
  */
-static void real_serve(FILE *file, const char *path)
+static void real_serve(FILE *file)
 {
-	char *root = getenv("GIT_PROJECT_ROOT");
-	if (!root) {
-		fprintf(stderr, "GIT_PROJECT_ROOT missing\n");
-		error_serve(file, 500, "GIT_PROJECT_ROOT missing\n");
+	char *object = git_object();
+	char *root = git_real_root();
+	char **cmds[] =
+	{(char *[]){"git", "-C", root, "cat-file", "-t", object, 0}};
+	FILE *file_type = exgt_chain(1, cmds);
+
+	free(object);
+	free(root);
+
+	if (!file_type) {
+		error_serve(file, 500, "illegal command format");
 		return;
 	}
 
-	char *full_path = build_path(root, path);
-	struct stat sb;
-	/* @todo this won't work if we're in a bare git repo */
-	if (stat(full_path, &sb)) {
-		perror("stat failed");
-		error_serve(file, 404,
-		            "File or directory could not be found\n");
-		goto out;
+	size_t len = 0;
+	char *line = NULL;
+	getline(&line, &len, file_type);
+
+	if (!line) {
+		error_serve(file, 500, "not a git repo");
+		return;
 	}
 
-	switch (sb.st_mode & S_IFMT) {
-	case S_IFDIR: dir_serve(file); break;
-	case S_IFREG: file_serve(file); break;
-	}
-
-out:
-	free(full_path);
+	if (strncmp(line, "tree", 4) == 0)
+		dir_serve(file);
+	else if (strncmp(line, "blob", 4) == 0)
+		file_serve(file);
 }
 
 /**
@@ -219,9 +223,8 @@ out:
  * log or git commit or whatever.
  *
  * @param file Output file to print to.
- * @param path URI path not strictly related to any actual disk location.
  */
-static void unreal_serve(FILE *file, const char *path)
+static void unreal_serve(FILE *file)
 {
 	index_serve(file);
 }
@@ -248,9 +251,9 @@ void html_serve()
 	/** @todo be more exagt, i.e. regex /exgt/? or something */
 	if (strncmp(path, "/exgt/", 7) > 0)
 		/* skip /exgt/ part of path */
-		real_serve(file, path + 6);
+		real_serve(file);
 	else
-		unreal_serve(file, path);
+		unreal_serve(file);
 
 out:
 	/* print file buffer content to server */
