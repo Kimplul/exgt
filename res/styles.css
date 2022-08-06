@@ -177,7 +177,7 @@ a {
 .clone {
 	text-align: right;
 	display: grid;
-	margin: 1em 1em;
+	margin: 1em 1em 0em 1em;
 	font-weight: normal;
 	overflow: auto;
 	white-space: nowrap;
