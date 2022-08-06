@@ -18,7 +18,7 @@
 static void res_expand(struct res *r)
 {
 	r->max *= 2;
-	r->p = realloc(r->p, r->max);
+	r->p = realloc(r->p, r->max * sizeof(void *));
 }
 
 struct res *res_create()
