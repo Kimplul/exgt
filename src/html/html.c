@@ -18,6 +18,8 @@
 #include "pages/pages.h"
 #include "html.h"
 
+static void html_print_elems(FILE *file, struct html_elem *elem);
+
 /**
  * Print one html attribute.
  *
@@ -86,14 +88,20 @@ static void html_print_elem(FILE *file, struct html_elem *elem)
 	if (elem->value)
 		fprintf(file, "%s", elem->value);
 
-	html_print(file, elem->child);
+	html_print_elems(file, elem->child);
 	html_print_endtag(file, elem);
+}
+
+static void html_print_elems(FILE *file, struct html_elem *elem)
+{
+	for (; elem; elem = elem->next)
+		html_print_elem(file, elem);
 }
 
 void html_print(FILE *file, struct html_elem *elem)
 {
-	for (; elem; elem = elem->next)
-		html_print_elem(file, elem);
+	pages_generate_doctype(file);
+	html_print_elems(file, elem);
 }
 
 struct html_attr *html_create_attr(const char *name, const char *value)

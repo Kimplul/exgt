@@ -269,7 +269,6 @@ void index_serve(FILE *file)
 	r = res_create();
 
 	http_header(file, 200, "text/html");
-	pages_generate_doctype(file);
 	struct html_elem *html, *index_main;
 	if (!(html = pages_generate_common(r, "Index\n", "Search projects",
 	                                   &index_main, NULL))) {
