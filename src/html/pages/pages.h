@@ -59,16 +59,19 @@ void dir_serve(FILE *file);
 /**
  * Generate page header.
  *
+ * @param r Resource manager.
  * @param html Root html tag.
  * @param page_title Title of page.
  * @return Pointer to head tag element.
  */
-struct html_elem *pages_generate_head(struct html_elem *html,
+struct html_elem *pages_generate_head(struct res* r,
+                                      struct html_elem *html,
                                       const char *page_title);
 
 /**
  * Generate page header.
  *
+ * @param r Resource manager.
  * @param body Body tag.
  * @param search_text Text to be inserted into search box.
  * @param cont If not \c NULL, place search element node into this address.
@@ -76,20 +79,22 @@ struct html_elem *pages_generate_head(struct html_elem *html,
  * function.
  * @return Pointer to header tag element.
  */
-struct html_elem *pages_generate_header(struct html_elem *body,
+struct html_elem *pages_generate_header(struct res *r,
+                                        struct html_elem *body,
                                         const char *search_text,
                                         struct html_elem **cont);
 
 /**
  * Generate common elements of all pages.
  *
+ * @param r Resource manager.
  * @param title Title of page.
  * @param search Search box placeholder value.
  * @param page_main Pointer where to place main element.
  * @param page_header Pointer where to place header element.
  * @return \c html element.
  */
-struct html_elem *pages_generate_common(const char *title,
+struct html_elem *pages_generate_common(struct res *r, const char *title,
                                         const char *search,
                                         struct html_elem **page_main,
                                         struct html_elem **page_header);
@@ -97,22 +102,21 @@ struct html_elem *pages_generate_common(const char *title,
 /**
  * Generate clone for page.
  *
- * @param page_main Parent main element.
  * @param r Resource manager.
+ * @param page_main Parent main element.
  * @return Clone element.
  */
-struct html_elem *pages_generate_clone(struct html_elem *page_main,
-                                       struct res *r);
+struct html_elem *pages_generate_clone(struct res *r,
+                                       struct html_elem *page_main);
 
 /**
  * Generate path for page.
  *
- * @param clone Previous clone element..
  * @param r Resource manager.
+ * @param clone Previous clone element.
  * @return Path element.
  */
-struct html_elem *pages_generate_path(struct html_elem *clone,
-                                      struct res *r);
+struct html_elem *pages_generate_path(struct res *r, struct html_elem *clone);
 
 /**
  * Generate doctype for html page.

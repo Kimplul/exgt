@@ -106,9 +106,9 @@ static bool check_readme(char *fname)
 static char *generate_ref_path(char *fname)
 {
 	/* since we already know we're dealing with a dir, the web dir is just
-	 * PATH_INFO. No need to fiddle with parsing a git command or anything. */
+	 * REQUEST_URI. No need to fiddle with parsing a git command or anything. */
 	char *web_dir;
-	if (!(web_dir = getenv("PATH_INFO")))
+	if (!(web_dir = getenv("REQUEST_URI")))
 		return NULL;
 
 	char *ref;
@@ -198,8 +198,16 @@ static struct html_elem *generate_dirview(struct html_elem *path, char **readme)
 	struct html_elem *dirview = html_add_elem(path, "dir", NULL);
 	html_add_attr(dirview, "class", "border dirview");
 
-	char *object = git_object();
-	char *root = git_real_root();
+	char *object;
+	if (!(object = git_object()))
+		return NULL;
+
+	char *root;
+	if (!(root = git_real_root())) {
+		free(object);
+		return NULL;
+	}
+
 	char **cmds[] =
 	{(char *[]){"git", "-C", root, "ls-tree", "-l", object, 0}};
 	FILE *ls_tree = exgt_chain(1, cmds);
@@ -312,11 +320,11 @@ static struct html_elem *generate_readmeview(struct html_elem *dirview,
 static struct html_elem *generate_main(struct html_elem *dir_main)
 {
 	struct html_elem *clone;
-	if (!(clone = pages_generate_clone(dir_main, r)))
+	if (!(clone = pages_generate_clone(r, dir_main)))
 		return NULL;
 
 	struct html_elem *path;
-	if (!(path = pages_generate_path(clone, r)))
+	if (!(path = pages_generate_path(r, clone)))
 		return NULL;
 
 	char *readme = NULL;
@@ -351,7 +359,7 @@ void dir_serve(FILE *file)
 	struct html_elem *html, *dir_main;
 	/** @todo set dir name instead of "dir" as title */
 	if (!(html =
-		      pages_generate_common(title, NULL,
+		      pages_generate_common(r, title, NULL,
 		                            &dir_main, NULL))) {
 		error_serve(file, 500, "error serving dir\n");
 		goto out;

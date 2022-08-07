@@ -214,11 +214,11 @@ static struct html_elem *generate_fileview(struct html_elem *path)
 static struct html_elem *generate_main(struct html_elem *file_main)
 {
 	struct html_elem *clone;
-	if (!(clone = pages_generate_clone(file_main, r)))
+	if (!(clone = pages_generate_clone(r, file_main)))
 		return NULL;
 
 	struct html_elem *path;
-	if (!(path = pages_generate_path(clone, r)))
+	if (!(path = pages_generate_path(r, clone)))
 		return NULL;
 
 	struct html_elem *fileview;
@@ -244,7 +244,7 @@ void file_serve(FILE *file)
 	struct html_elem *html, *file_main;
 	/** @todo set file name instead of "file" as title */
 	if (!(html =
-		      pages_generate_common(title, NULL,
+		      pages_generate_common(r, title, NULL,
 		                            &file_main, NULL))) {
 		error_serve(file, 500, "error serving file\n");
 		goto out;

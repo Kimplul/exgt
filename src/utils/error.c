@@ -9,9 +9,9 @@
  * Error helper implementation.
  */
 
-int error(const char *format, ...)
+int _error(const char *file, int line, const char *format, ...)
 {
-	fprintf(stderr, "error: ");
+	fprintf(stderr, "error: %s:%d: ", file, line);
 	va_list args;
 	va_start(args, format);
 	int ret = vfprintf(stderr, format, args);

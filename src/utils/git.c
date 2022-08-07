@@ -25,7 +25,7 @@ char *git_path()
 		return NULL;
 	}
 
-	return path_skip_nth(path, 2);
+	return path_skip_nth(path, 1);
 }
 
 char *git_commit()
@@ -75,7 +75,7 @@ char *git_user_name()
 		return NULL;
 	}
 
-	return path_only_nth(path, 1);
+	return path_only_nth(path, 0);
 }
 
 char *git_repo_name()
@@ -86,7 +86,7 @@ char *git_repo_name()
 		return NULL;
 	}
 
-	return path_only_nth(path, 2);
+	return path_only_nth(path, 1);
 }
 
 char *git_root()
@@ -98,24 +98,17 @@ char *git_root()
 	}
 
 	char *start;
-	if (!(start = path_cut_nth(path, 2)))
+	if (!(start = path_cut_nth(path, 1)))
 		return NULL;
 
-	char *mid;
-	if (!(mid = path_skip_nth(start, 0))) {
-		free(start);
-		return NULL;
-	}
-
-	free(start);
-	return mid;
+	return start;
 }
 
 char *git_real_root()
 {
 	char *path;
 	if (!(path = getenv("GIT_PROJECT_ROOT"))) {
-		error("couldn't find GIT_PROJECT_ROOT");
+		error("couldn't find GIT_PROJECT_ROOT\n");
 		return NULL;
 	}
 
@@ -140,14 +133,24 @@ char *git_web_root()
 		return NULL;
 	}
 
-	return path_cut_nth(path, 2);
+	if (!(path = path_cut_nth(path, 1)))
+		return NULL;
+
+	char *web_path;
+	if (!(web_path = build_web_path(path))) {
+		free(path);
+		return NULL;
+	}
+
+	free(path);
+	return web_path;
 }
 
 char *git_web_last()
 {
 	char *path;
-	if (!(path = getenv("PATH_INFO"))) {
-		error("couldn't find PATH_INFO\n");
+	if (!(path = getenv("REQUEST_URI"))) {
+		error("couldn't find REQUEST_URI\n");
 		return NULL;
 	}
 

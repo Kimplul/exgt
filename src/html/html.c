@@ -188,8 +188,19 @@ void html_destroy(struct html_elem *elem)
  */
 static void real_serve(FILE *file)
 {
-	char *object = git_object();
-	char *root = git_real_root();
+	char *object;
+	if (!(object = git_object())) {
+		error_serve(file, 500, "couldn't get intended git object");
+		return;
+	}
+
+	char *root;
+	if (!(root = git_real_root())) {
+		error_serve(file, 500, "couldn't get git real root");
+		free(object);
+		return;
+	}
+
 	char **cmds[] =
 	{(char *[]){"git", "-C", root, "cat-file", "-t", object, 0}};
 	FILE *file_type = exgt_chain(1, cmds);
@@ -206,6 +217,8 @@ static void real_serve(FILE *file)
 	char *line = NULL;
 	getline(&line, &len, file_type);
 
+	fclose(file_type);
+
 	if (!line) {
 		error_serve(file, 500, "not a git repo");
 		return;
@@ -215,6 +228,8 @@ static void real_serve(FILE *file)
 		dir_serve(file);
 	else if (strncmp(line, "blob", 4) == 0)
 		file_serve(file);
+
+	free(line);
 }
 
 /**
@@ -247,13 +262,11 @@ void html_serve()
 		goto out;
 	}
 
-	/** @todo utf8? */
-	/** @todo be more exagt, i.e. regex /exgt/? or something */
-	if (strncmp(path, "/exgt/", 7) > 0)
-		/* skip /exgt/ part of path */
-		real_serve(file);
-	else
+	/** @todo what about profile pages etc? */
+	if (strcmp(path, "/") == 0)
 		unreal_serve(file);
+	else
+		real_serve(file);
 
 out:
 	/* print file buffer content to server */

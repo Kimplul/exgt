@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct html_elem *pages_generate_head(struct html_elem *html,
+struct html_elem *pages_generate_head(struct res *r, struct html_elem *html,
                                       const char *page_title)
 {
 	struct html_elem *head = html_add_child(html, "head", NULL);
@@ -24,27 +24,35 @@ struct html_elem *pages_generate_head(struct html_elem *html,
 	struct html_elem *utf8 = html_add_elem(title, "meta", NULL);
 	html_add_attr(utf8, "charset", "utf8");
 
+	char *styles;
+	if (!(styles = build_web_path("styles.css")))
+		return NULL;
+
 	struct html_elem *preload = html_add_elem(utf8, "link", NULL);
 	html_add_attr(preload, "rel", "preload");
-	html_add_attr(preload, "href", "styles.css");
+	html_add_attr(preload, "href", styles);
 	html_add_attr(preload, "as", "style");
 
 	struct html_elem *link = html_add_elem(preload, "link", NULL);
 	html_add_attr(link, "rel", "stylesheet");
-	html_add_attr(link, "href", "styles.css");
+	html_add_attr(link, "href", styles);
+
+	res_add(r, styles);
 
 	return head;
 }
 
-struct html_elem *pages_generate_header(struct html_elem *body,
+struct html_elem *pages_generate_header(struct res *r, struct html_elem *body,
                                         const char *search_text,
                                         struct html_elem **cont)
 {
 	struct html_elem *header = html_add_child(body, "header", NULL);
 	/** @todo allow user to specify home button text? */
+	char *web_root = web_root_path();
 	struct html_elem *exgt_button = html_add_child(header, "a", "EXGT");
 	html_add_attr(exgt_button, "class", "button");
-	html_add_attr(exgt_button, "href", "/exgt");
+	html_add_attr(exgt_button, "href", web_root);
+	res_add(r, web_root);
 
 	struct html_elem *user_button = html_add_elem(exgt_button, "a", "User");
 	html_add_attr(user_button, "class", "button");
@@ -67,10 +75,13 @@ struct html_elem *pages_generate_header(struct html_elem *body,
 	return header;
 }
 
-struct html_elem *pages_generate_common(const char *title, const char *search,
+struct html_elem *pages_generate_common(struct res *r,
+                                        const char *title, const char *search,
                                         struct html_elem **page_main,
                                         struct html_elem **page_header)
 {
+	(void)r; /* unused for now */
+
 	/* normally I don't use C89 style initialization, but lto gives a
 	 * warning about possibly uninitialized variables if I use my typical
 	 * style. */
@@ -85,7 +96,7 @@ struct html_elem *pages_generate_common(const char *title, const char *search,
 		return NULL;
 	}
 
-	if (!(head = pages_generate_head(html, title))) {
+	if (!(head = pages_generate_head(r, html, title))) {
 		error("couldn't create head");
 		goto out;
 	}
@@ -95,7 +106,7 @@ struct html_elem *pages_generate_common(const char *title, const char *search,
 		goto out;
 	}
 
-	if (!(elem_header = pages_generate_header(body, search, NULL))) {
+	if (!(elem_header = pages_generate_header(r, body, search, NULL))) {
 		error("couldn't create header");
 		goto out;
 	}
@@ -115,9 +126,10 @@ out:
 	return html;
 }
 
-struct html_elem *pages_generate_clone(struct html_elem *page_main,
-                                       struct res *r)
+struct html_elem *pages_generate_clone(struct res *r,
+                                       struct html_elem *page_main)
 {
+	(void)r; /* unused for now */
 	struct html_elem *clone = html_add_child(page_main, "div", NULL);
 	html_add_attr(clone, "class", "clone");
 
@@ -127,8 +139,7 @@ struct html_elem *pages_generate_clone(struct html_elem *page_main,
 	return clone;
 }
 
-struct html_elem *pages_generate_path(struct html_elem *clone,
-                                      struct res *r)
+struct html_elem *pages_generate_path(struct res *r, struct html_elem *clone)
 {
 	char *path;
 	if (!(path = git_path()))

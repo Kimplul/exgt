@@ -158,8 +158,11 @@ static struct html_elem *generate_project(PGresult *res, size_t i)
 	description = strdup(description);
 	res_add(r, description);
 
-	path = strdup(path);
-	res_add(r, path);
+	char *ref_path = build_web_path(path);
+	if (!ref_path)
+		return NULL;
+
+	res_add(r, ref_path);
 
 	char *real_path = repo_real_file(path);
 	if (!real_path)
@@ -173,7 +176,7 @@ static struct html_elem *generate_project(PGresult *res, size_t i)
 
 	res_add(r, date);
 
-	return generate_known_project(owner, name, path, date, description);
+	return generate_known_project(owner, name, ref_path, date, description);
 }
 
 /**
@@ -268,7 +271,7 @@ void index_serve(FILE *file)
 	http_header(file, 200, "text/html");
 	pages_generate_doctype(file);
 	struct html_elem *html, *index_main;
-	if (!(html = pages_generate_common("Index\n", "Search projects",
+	if (!(html = pages_generate_common(r, "Index\n", "Search projects",
 	                                   &index_main, NULL))) {
 		error_serve(file, 500, "error serving index\n");
 		goto out;

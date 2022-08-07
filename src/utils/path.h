@@ -19,6 +19,9 @@
  */
 char *build_path(const char *root, const char *path);
 
+char *web_root_path();
+char *build_web_path(const char *path);
+
 /**
  * Skip first elements in path, starting from nth element.
  *
