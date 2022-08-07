@@ -3,10 +3,13 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "url.h"
 #include "git.h"
 #include "path.h"
+#include "error.h"
+#include "chain.h"
 
 /**
  * @file git.c
@@ -16,9 +19,11 @@
 
 char *git_path()
 {
-	char *path = getenv("PATH_INFO");
-	if (!path)
+	char *path;
+	if (!(path = getenv("PATH_INFO"))) {
+		error("couldn't find PATH_INFO\n");
 		return NULL;
+	}
 
 	return path_skip_nth(path, 2);
 }
@@ -65,8 +70,10 @@ char *git_object()
 char *git_user_name()
 {
 	char *path;
-	if (!(path = getenv("PATH_INFO")))
+	if (!(path = getenv("PATH_INFO"))) {
+		error("couldn't find PATH_INFO\n");
 		return NULL;
+	}
 
 	return path_only_nth(path, 1);
 }
@@ -74,8 +81,10 @@ char *git_user_name()
 char *git_repo_name()
 {
 	char *path;
-	if (!(path = getenv("PATH_INFO")))
+	if (!(path = getenv("PATH_INFO"))) {
+		error("couldn't find PATH_INFO\n");
 		return NULL;
+	}
 
 	return path_only_nth(path, 2);
 }
@@ -83,8 +92,10 @@ char *git_repo_name()
 char *git_root()
 {
 	char *path;
-	if (!(path = getenv("PATH_INFO")))
+	if (!(path = getenv("PATH_INFO"))) {
+		error("couldn't find PATH_INFO\n");
 		return NULL;
+	}
 
 	char *start;
 	if (!(start = path_cut_nth(path, 2)))
@@ -103,8 +114,10 @@ char *git_root()
 char *git_real_root()
 {
 	char *path;
-	if (!(path = getenv("GIT_PROJECT_ROOT")))
+	if (!(path = getenv("GIT_PROJECT_ROOT"))) {
+		error("couldn't find GIT_PROJECT_ROOT");
 		return NULL;
+	}
 
 	char *root;
 	if (!(root = git_root()))
@@ -122,8 +135,10 @@ char *git_real_root()
 char *git_web_root()
 {
 	char *path;
-	if (!(path = getenv("PATH_INFO")))
+	if (!(path = getenv("PATH_INFO"))) {
+		error("couldn't find PATH_INFO\n");
 		return NULL;
+	}
 
 	return path_cut_nth(path, 2);
 }
@@ -131,8 +146,44 @@ char *git_web_root()
 char *git_web_last()
 {
 	char *path;
-	if (!(path = getenv("PATH_INFO")))
+	if (!(path = getenv("PATH_INFO"))) {
+		error("couldn't find PATH_INFO\n");
 		return NULL;
+	}
 
 	return path_last_elem(path);
+}
+
+char *repo_last_commit(char *path)
+{
+	char **cmds[] =
+	{(char *[]){"git", "-C", path, "log", "-1", "--format=%ci", 0}};
+	FILE *date = exgt_chain(1, cmds);
+
+	if (!date)
+		return NULL;
+
+	size_t len = 0;
+	char *line = NULL;
+	if (getline(&line, &len, date) == -1) {
+		error("reading last commit failed\n");
+		if (line)
+			free(line);
+		line = NULL;
+	}
+
+	fclose(date);
+
+	return line;
+}
+
+char *repo_real_file(char *path)
+{
+	char *real_root;
+	if (!(real_root = getenv("GIT_PROJECT_ROOT"))) {
+		error("couldn't get GIT_PROJECT_ROOT\n");
+		return NULL;
+	}
+
+	return build_path(real_root, path);
 }

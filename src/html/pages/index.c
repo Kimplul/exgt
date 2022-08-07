@@ -5,12 +5,23 @@
  * Index page generator.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include <utils/http.h>
 #include <utils/error.h>
+#include <utils/chain.h>
+#include <utils/git.h>
+#include <utils/path.h>
+#include <utils/res.h>
+#include <utils/db.h>
 
 #include "pages.h"
+
+/** Index generator resource manager. */
+static struct res *r;
 
 /**
  * Generate page content, in the context of the index page this means
@@ -87,17 +98,20 @@ static struct html_elem *generate_project_content(
 }
 
 /**
- * Generate one project entry in project list.
+ * Generate one project entry in project list from known values.
  *
+ * @param owner Owner of project.
  * @param name Name of project.
  * @param path Path of project.
  * @param date Last update of project.
  * @param description Description of project.
  * @return Project element.
  */
-static struct html_elem *generate_project(const char *name, const char *path,
-                                          const char *date,
-                                          const char *description)
+static struct html_elem *generate_known_project(const char *owner,
+                                                const char *name,
+                                                const char *path,
+                                                const char *date,
+                                                const char *description)
 {
 	struct html_elem *project = html_create_elem("div", NULL);
 	html_add_attr(project, "class", "project border");
@@ -118,6 +132,51 @@ static struct html_elem *generate_project(const char *name, const char *path,
 }
 
 /**
+ * Generate one project entry in project list with database connection info.
+ *
+ * @param res Result of project query.
+ * @param i Index of column to process.
+ * @return Corresponding html element.
+ */
+static struct html_elem *generate_project(PGresult *res, size_t i)
+{
+	char *owner = PQgetvalue(res, i, 0);
+	char *name = PQgetvalue(res, i, 1);
+	char *description = PQgetvalue(res, i, 2);
+
+	char *path = PQgetvalue(res, i, 3);
+
+	if (!owner || !name || !description || !path)
+		return NULL;
+
+	owner = strdup(owner);
+	res_add(r, owner);
+
+	name = strdup(name);
+	res_add(r, name);
+
+	description = strdup(description);
+	res_add(r, description);
+
+	path = strdup(path);
+	res_add(r, path);
+
+	char *real_path = repo_real_file(path);
+	if (!real_path)
+		return NULL;
+
+	res_add(r, real_path);
+
+	char *date = repo_last_commit(real_path);
+	if (!date)
+		return NULL;
+
+	res_add(r, date);
+
+	return generate_known_project(owner, name, path, date, description);
+}
+
+/**
  * Take some sampling of existing projects and insert them into the project
  * list.
  *
@@ -129,11 +188,39 @@ static struct html_elem *generate_project(const char *name, const char *path,
  */
 static struct html_elem *generate_projects(struct html_elem *project_list)
 {
-	/** @todo set up postgresql connection, use dummy values for now */
-	struct html_elem *project = generate_project("test\n", "/Kimplul/test",
-	                                             "01/02/03\n",
-	                                             "Test repo\n");
-	html_append_child(project_list, project);
+	PGconn *conn = new_connection();
+	if (PQstatus(conn) != CONNECTION_OK)
+		return NULL;
+
+	PGresult *res = PQexec(conn,
+	                       "select owner, name, description, path from repos");
+	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+		error("repo query failed: %s", PQerrorMessage(conn));
+		PQclear(res);
+		close_connection(conn);
+		return NULL;
+	}
+
+	size_t n = PQntuples(res);
+	struct html_elem *project = NULL;
+	for (size_t i = 0; i < n; ++i) {
+		struct html_elem *new_project = generate_project(res, i);
+		if (project)
+			html_append_elem(project, new_project);
+		else
+			html_append_child(project_list, new_project);
+
+		project = new_project;
+	}
+
+	if (!project) {
+		project = html_add_child(project_list, "p",
+		                         "Sorry, looks like there aren't any projects.");
+		html_add_attr(project, "class", "project");
+	}
+
+	PQclear(res);
+	close_connection(conn);
 	return project;
 }
 
@@ -176,6 +263,8 @@ static struct html_elem *generate_main(struct html_elem *index_main)
 
 void index_serve(FILE *file)
 {
+	r = res_create();
+
 	http_header(file, 200, "text/html");
 	pages_generate_doctype(file);
 	struct html_elem *html, *index_main;
@@ -193,4 +282,5 @@ void index_serve(FILE *file)
 	html_print(file, html);
 out:
 	html_destroy(html);
+	res_destroy(r);
 }

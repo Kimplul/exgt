@@ -73,4 +73,20 @@ char *git_web_root();
  */
 char *git_web_last();
 
+/**
+ * Get last commit in repo at \p path.
+ *
+ * @param path Path to repository.
+ * @return ISO8661-like date string for last commit. (in main branch?)
+ */
+char *repo_last_commit(char *path);
+
+/**
+ * Get real location of repo file.
+ *
+ * @param path Path to repository.
+ * @return Real path to repository.
+ */
+char *repo_real_file(char *path);
+
 #endif /* EXGT_GIT_H */
