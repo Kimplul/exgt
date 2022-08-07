@@ -351,7 +351,7 @@ void dir_serve(FILE *file)
 	struct html_elem *html, *dir_main;
 	/** @todo set dir name instead of "dir" as title */
 	if (!(html =
-		      pages_generate_common(title, "Search project",
+		      pages_generate_common(title, NULL,
 		                            &dir_main, NULL))) {
 		error_serve(file, 500, "error serving dir\n");
 		goto out;

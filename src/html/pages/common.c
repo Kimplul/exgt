@@ -50,13 +50,19 @@ struct html_elem *pages_generate_header(struct html_elem *body,
 	html_add_attr(user_button, "class", "button");
 	html_add_attr(user_button, "href", "/user");
 
-	struct html_elem *search = html_add_elem(user_button, "input", NULL);
-	html_add_attr(search, "class", "search border");
-	html_add_attr(search, "type", "search");
-	html_add_attr(search, "placeholder", search_text);
+	struct html_elem *last = user_button;
+	if (search_text) {
+		struct html_elem *search = html_add_elem(user_button, "input",
+		                                         NULL);
+		html_add_attr(search, "class", "search border");
+		html_add_attr(search, "type", "search");
+		html_add_attr(search, "placeholder", search_text);
+
+		last = search;
+	}
 
 	if (cont)
-		*cont = search;
+		*cont = last;
 
 	return header;
 }

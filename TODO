@@ -1,0 +1,15 @@
+List of requirements for MVP:
+
++ Attach some kind of database to show available projects on index page
++ Add project search
++ Add profile view
++ Project management, creation/deletion
+  + Cookies
+
+Possible extensions in the future:
+
++ In-project search
++ Issues
++ Pull requests
++ Git blame
++ User configurable CSS
