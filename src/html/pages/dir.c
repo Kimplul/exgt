@@ -359,7 +359,7 @@ void dir_serve(FILE *file)
 	struct html_elem *html, *dir_main;
 	/** @todo set dir name instead of "dir" as title */
 	if (!(html =
-		      pages_generate_common(r, title, NULL,
+		      pages_generate_common(r, title,
 		                            &dir_main, NULL))) {
 		error_serve(file, 500, "error serving dir\n");
 		goto out;

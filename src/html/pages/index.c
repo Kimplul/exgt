@@ -186,7 +186,8 @@ static struct html_elem *generate_projects(struct html_elem *project_list)
 
 	DIR *dir = opendir(root);
 	if (!dir) {
-		fprintf(stderr, "couldn't open exgt root\n");
+		fprintf(stderr, "couldn't open exgt root %s\n", root);
+		return NULL;
 	}
 
 	struct dirent *dirent = NULL;
@@ -195,6 +196,9 @@ static struct html_elem *generate_projects(struct html_elem *project_list)
 			continue;
 
 		struct html_elem *new_project = generate_project(dirent);
+		if (!new_project)
+			continue;
+
 		if (project)
 			html_append_elem(project, new_project);
 		else
@@ -255,7 +259,7 @@ void index_serve(FILE *file)
 
 	http_header(file, 200, "text/html");
 	struct html_elem *html, *index_main;
-	if (!(html = pages_generate_common(r, "Index\n", "Search projects",
+	if (!(html = pages_generate_common(r, "Index\n",
 	                                   &index_main, NULL))) {
 		error_serve(file, 500, "error serving index\n");
 		goto out;

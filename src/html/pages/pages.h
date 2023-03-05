@@ -73,15 +73,13 @@ struct html_elem *pages_generate_head(struct res* r,
  *
  * @param r Resource manager.
  * @param body Body tag.
- * @param search_text Text to be inserted into search box.
- * @param cont If not \c NULL, place search element node into this address.
+ * @param cont If not \c NULL, last element node into this address.
  * Allows use to continue appending elements to header from some higher level
  * function.
  * @return Pointer to header tag element.
  */
 struct html_elem *pages_generate_header(struct res *r,
                                         struct html_elem *body,
-                                        const char *search_text,
                                         struct html_elem **cont);
 
 /**
@@ -89,13 +87,11 @@ struct html_elem *pages_generate_header(struct res *r,
  *
  * @param r Resource manager.
  * @param title Title of page.
- * @param search Search box placeholder value.
  * @param page_main Pointer where to place main element.
  * @param page_header Pointer where to place header element.
  * @return \c html element.
  */
 struct html_elem *pages_generate_common(struct res *r, const char *title,
-                                        const char *search,
                                         struct html_elem **page_main,
                                         struct html_elem **page_header);
 

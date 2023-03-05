@@ -26,7 +26,7 @@ char *git_path()
 		return NULL;
 	}
 
-	char *cut_path = path_cut_nth(path, 1);
+	char *cut_path = path_skip_nth(path, 0);
 	return cut_path ? cut_path : strdup("");
 }
 
@@ -120,15 +120,13 @@ char *git_real_root()
 
 char *git_web_root()
 {
-	char *path;
-	if (!(path = getenv("PATH_INFO"))) {
-		error("couldn't find PATH_INFO\n");
+	char *repo;
+	if (!(repo = git_repo_name()))
 		return NULL;
-	}
 
 	char *web_path;
-	if (!(web_path = build_web_path(path))) {
-		free(path);
+	if (!(web_path = build_web_path(repo))) {
+		free(repo);
 		return NULL;
 	}
 
@@ -186,14 +184,25 @@ char *repo_description(char *path)
 	if (!real)
 		return NULL;
 
-	char *desc_file = build_path(real, ".git/description");
-	if (!desc_file) {
+	char *norm_desc_file = build_path(real, ".git/description");
+	if (!norm_desc_file) {
 		free(real);
 		return NULL;
 	}
 
-	char *desc = read_file(desc_file);
-	free(desc_file);
+	char *bare_desc_file = build_path(real, "description");
+	if (!bare_desc_file) {
+		free(real);
+		free(norm_desc_file);
+		return NULL;
+	}
+
+	char *desc = read_file(bare_desc_file);
+	if (!desc)
+		desc = read_file(norm_desc_file);
+
+	free(norm_desc_file);
+	free(bare_desc_file);
 	free(real);
 	return desc;
 }

@@ -40,7 +40,7 @@ FILE *exgt_chain(size_t n, char **cmds[])
 		int pid;
 		if (posix_spawnp(&pid, cmds[i][0], &actions, NULL, cmds[i],
 		                 environ)) {
-			perror("posix_spawnp failed");
+			perror(cmds[i][0]);
 			return NULL;
 		}
 

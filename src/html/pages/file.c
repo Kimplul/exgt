@@ -244,7 +244,7 @@ void file_serve(FILE *file)
 	struct html_elem *html, *file_main;
 	/** @todo set file name instead of "file" as title */
 	if (!(html =
-		      pages_generate_common(r, title, NULL,
+		      pages_generate_common(r, title,
 		                            &file_main, NULL))) {
 		error_serve(file, 500, "error serving file\n");
 		goto out;

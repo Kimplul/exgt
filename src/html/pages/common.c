@@ -43,7 +43,6 @@ struct html_elem *pages_generate_head(struct res *r, struct html_elem *html,
 }
 
 struct html_elem *pages_generate_header(struct res *r, struct html_elem *body,
-                                        const char *search_text,
                                         struct html_elem **cont)
 {
 	struct html_elem *header = html_add_child(body, "header", NULL);
@@ -54,29 +53,14 @@ struct html_elem *pages_generate_header(struct res *r, struct html_elem *body,
 	html_add_attr(exgt_button, "href", web_root);
 	res_add(r, web_root);
 
-	struct html_elem *user_button = html_add_elem(exgt_button, "a", "User");
-	html_add_attr(user_button, "class", "button");
-	html_add_attr(user_button, "href", "/user");
-
-	struct html_elem *last = user_button;
-	if (search_text) {
-		struct html_elem *search = html_add_elem(user_button, "input",
-		                                         NULL);
-		html_add_attr(search, "class", "search border");
-		html_add_attr(search, "type", "search");
-		html_add_attr(search, "placeholder", search_text);
-
-		last = search;
-	}
-
 	if (cont)
-		*cont = last;
+		*cont = exgt_button;
 
 	return header;
 }
 
 struct html_elem *pages_generate_common(struct res *r,
-                                        const char *title, const char *search,
+                                        const char *title,
                                         struct html_elem **page_main,
                                         struct html_elem **page_header)
 {
@@ -106,7 +90,7 @@ struct html_elem *pages_generate_common(struct res *r,
 		goto out;
 	}
 
-	if (!(elem_header = pages_generate_header(r, body, search, NULL))) {
+	if (!(elem_header = pages_generate_header(r, body, NULL))) {
 		error("couldn't create header");
 		goto out;
 	}

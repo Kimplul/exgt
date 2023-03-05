@@ -79,16 +79,16 @@ char *build_path(const char *root, const char *path_info)
 
 char *web_root_path()
 {
-	static char *web_root = NULL;
+	static char *request_uri;
+	static size_t len;
 
-	char *request_uri;
+	if (request_uri)
+		goto out;
+
 	if (!(request_uri = getenv("REQUEST_URI"))) {
 		error("couldn't find REQUEST_URI\n");
 		return NULL;
 	}
-
-	if (web_root)
-		goto out;
 
 	char *path_info;
 	if (!(path_info = getenv("PATH_INFO"))) {
@@ -96,18 +96,12 @@ char *web_root_path()
 		return NULL;
 	}
 
-	if (strcmp(path_info, "/") == 0) {
-		web_root = request_uri + strlen(request_uri);
-		goto out;
-	}
-
-	if (!(web_root = strstr(request_uri, path_info))) {
-			error("couldn't get web root\n");
-			return NULL;
-	}
-
+	if (path_info[0] == '/' && path_info[1] == 0)
+		len = strlen(request_uri);
+	else
+		len = strlen(request_uri) - strlen(path_info);
 out:
-	return strndup(request_uri, web_root - request_uri);
+	return strndup(request_uri, len);
 }
 
 char *build_web_path(const char *path)
