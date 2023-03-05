@@ -92,17 +92,17 @@ struct html_elem *pages_generate_common(struct res *r,
 	struct html_elem *elem_main = NULL;
 
 	if (!(html = html_create_elem("html", NULL))) {
-		error("couldn't create html");
+		error("couldn't create html\n");
 		return NULL;
 	}
 
 	if (!(head = pages_generate_head(r, html, title))) {
-		error("couldn't create head");
+		error("couldn't create head\n");
 		goto out;
 	}
 
 	if (!(body = html_add_elem(head, "body", NULL))) {
-		error("couldn't create body");
+		error("couldn't create body\n");
 		goto out;
 	}
 

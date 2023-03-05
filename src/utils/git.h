@@ -89,4 +89,13 @@ char *repo_last_commit(char *path);
  */
 char *repo_real_file(char *path);
 
+/**
+ * Get description of repository.
+ *
+ * @param path Path to repository.
+ * @return Description of repository.
+ */
+char *repo_description(char *path);
+
+
 #endif /* EXGT_GIT_H */

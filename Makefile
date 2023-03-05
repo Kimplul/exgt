@@ -42,7 +42,7 @@ docs:
 	@doxygen docs/doxygen.conf
 
 exgt: $(OBJS)
-	$(COMPILE) $(OBJS) -o $@ -lpq
+	$(COMPILE) $(OBJS) -o $@
 
 .PHONY: clean
 clean:

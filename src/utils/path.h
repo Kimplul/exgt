@@ -19,7 +19,19 @@
  */
 char *build_path(const char *root, const char *path);
 
+/**
+ * Get web root path.
+ *
+ * @return Web root path.
+ */
 char *web_root_path();
+
+/**
+ * Build web path.
+ *
+ * @param path Path to build relative to web root.
+ * @return Path on the web.
+ */
 char *build_web_path(const char *path);
 
 /**

@@ -1,3 +1,6 @@
++ Retarget what I'm trying to do, no SQL, just use basic files and directories
+(at least to begin with). Actions would be cool, though.
+
 List of requirements for MVP:
 
 + Attach some kind of database to show available projects on index page

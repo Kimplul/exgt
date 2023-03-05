@@ -92,6 +92,12 @@ static void html_print_elem(FILE *file, struct html_elem *elem)
 	html_print_endtag(file, elem);
 }
 
+/**
+ * Print all HTML elements in \p elem.
+ *
+ * @param file Output file to print to.
+ * @param elem Head element to start printing from.
+ */
 static void html_print_elems(FILE *file, struct html_elem *elem)
 {
 	for (; elem; elem = elem->next)

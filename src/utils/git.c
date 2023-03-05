@@ -10,6 +10,7 @@
 #include "path.h"
 #include "error.h"
 #include "chain.h"
+#include "file.h"
 
 /**
  * @file git.c
@@ -25,7 +26,8 @@ char *git_path()
 		return NULL;
 	}
 
-	return path_skip_nth(path, 1);
+	char *cut_path = path_cut_nth(path, 1);
+	return cut_path ? cut_path : strdup("");
 }
 
 char *git_commit()
@@ -69,6 +71,7 @@ char *git_object()
 
 char *git_user_name()
 {
+	/* this doesn't work */
 	char *path;
 	if (!(path = getenv("PATH_INFO"))) {
 		error("couldn't find PATH_INFO\n");
@@ -86,22 +89,12 @@ char *git_repo_name()
 		return NULL;
 	}
 
-	return path_only_nth(path, 1);
+	return path_only_nth(path, 0);
 }
 
 char *git_root()
 {
-	char *path;
-	if (!(path = getenv("PATH_INFO"))) {
-		error("couldn't find PATH_INFO\n");
-		return NULL;
-	}
-
-	char *start;
-	if (!(start = path_cut_nth(path, 1)))
-		return NULL;
-
-	return start;
+	return git_repo_name();
 }
 
 char *git_real_root()
@@ -133,16 +126,12 @@ char *git_web_root()
 		return NULL;
 	}
 
-	if (!(path = path_cut_nth(path, 1)))
-		return NULL;
-
 	char *web_path;
 	if (!(web_path = build_web_path(path))) {
 		free(path);
 		return NULL;
 	}
 
-	free(path);
 	return web_path;
 }
 
@@ -189,4 +178,22 @@ char *repo_real_file(char *path)
 	}
 
 	return build_path(real_root, path);
+}
+
+char *repo_description(char *path)
+{
+	char *real = repo_real_file(path);
+	if (!real)
+		return NULL;
+
+	char *desc_file = build_path(real, ".git/description");
+	if (!desc_file) {
+		free(real);
+		return NULL;
+	}
+
+	char *desc = read_file(desc_file);
+	free(desc_file);
+	free(real);
+	return desc;
 }

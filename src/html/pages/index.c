@@ -9,14 +9,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <dirent.h>
 
-#include <utils/http.h>
 #include <utils/error.h>
 #include <utils/chain.h>
-#include <utils/git.h>
+#include <utils/http.h>
+#include <utils/file.h>
 #include <utils/path.h>
+#include <utils/git.h>
 #include <utils/res.h>
-#include <utils/db.h>
 
 #include "pages.h"
 
@@ -100,15 +101,13 @@ static struct html_elem *generate_project_content(
 /**
  * Generate one project entry in project list from known values.
  *
- * @param owner Owner of project.
  * @param name Name of project.
  * @param path Path of project.
  * @param date Last update of project.
  * @param description Description of project.
  * @return Project element.
  */
-static struct html_elem *generate_known_project(const char *owner,
-                                                const char *name,
+static struct html_elem *generate_known_project(const char *name,
                                                 const char *path,
                                                 const char *date,
                                                 const char *description)
@@ -134,37 +133,24 @@ static struct html_elem *generate_known_project(const char *owner,
 /**
  * Generate one project entry in project list with database connection info.
  *
- * @param res Result of project query.
- * @param i Index of column to process.
+ * @param entry Directory entry to generate project from.
  * @return Corresponding html element.
  */
-static struct html_elem *generate_project(PGresult *res, size_t i)
+static struct html_elem *generate_project(struct dirent *entry)
 {
-	char *owner = PQgetvalue(res, i, 0);
-	char *name = PQgetvalue(res, i, 1);
-	char *description = PQgetvalue(res, i, 2);
-
-	char *path = PQgetvalue(res, i, 3);
-
-	if (!owner || !name || !description || !path)
-		return NULL;
-
-	owner = strdup(owner);
-	res_add(r, owner);
-
-	name = strdup(name);
+	char *name = strdup(entry->d_name);
 	res_add(r, name);
 
-	description = strdup(description);
+	char *description = repo_description(name);
 	res_add(r, description);
 
-	char *ref_path = build_web_path(path);
+	char *ref_path = build_web_path(name);
 	if (!ref_path)
 		return NULL;
 
 	res_add(r, ref_path);
 
-	char *real_path = repo_real_file(path);
+	char *real_path = repo_real_file(name);
 	if (!real_path)
 		return NULL;
 
@@ -176,7 +162,7 @@ static struct html_elem *generate_project(PGresult *res, size_t i)
 
 	res_add(r, date);
 
-	return generate_known_project(owner, name, ref_path, date, description);
+	return generate_known_project(name, ref_path, date, description);
 }
 
 /**
@@ -191,23 +177,24 @@ static struct html_elem *generate_project(PGresult *res, size_t i)
  */
 static struct html_elem *generate_projects(struct html_elem *project_list)
 {
-	PGconn *conn = new_connection();
-	if (PQstatus(conn) != CONNECTION_OK)
+	struct html_elem *project = NULL;
+	char *root = git_real_root();
+	if (!root)
 		return NULL;
 
-	PGresult *res = PQexec(conn,
-	                       "select owner, name, description, path from repos");
-	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-		error("repo query failed: %s", PQerrorMessage(conn));
-		PQclear(res);
-		close_connection(conn);
-		return NULL;
+	res_add(r, root);
+
+	DIR *dir = opendir(root);
+	if (!dir) {
+		fprintf(stderr, "couldn't open exgt root\n");
 	}
 
-	size_t n = PQntuples(res);
-	struct html_elem *project = NULL;
-	for (size_t i = 0; i < n; ++i) {
-		struct html_elem *new_project = generate_project(res, i);
+	struct dirent *dirent = NULL;
+	while ((dirent = readdir(dir))) {
+		if (dirent->d_name[0] == '.')
+			continue;
+
+		struct html_elem *new_project = generate_project(dirent);
 		if (project)
 			html_append_elem(project, new_project);
 		else
@@ -222,8 +209,6 @@ static struct html_elem *generate_projects(struct html_elem *project_list)
 		html_add_attr(project, "class", "project");
 	}
 
-	PQclear(res);
-	close_connection(conn);
 	return project;
 }
 
@@ -277,7 +262,7 @@ void index_serve(FILE *file)
 	}
 
 	if (!generate_main(index_main)) {
-		error_serve(file, 500, "couldn't generate index main");
+		error_serve(file, 500, "couldn't generate index main\n");
 		goto out;
 	}
 
