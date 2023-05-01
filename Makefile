@@ -1,7 +1,7 @@
 DO	!= echo -n > deps.mk
 
-DEBUGFLAGS	!= [ $(RELEASE) ] && echo "-O2 -DNODEBUG" || echo "-O0 -g -DDEBUG"
-CFLAGS		= -Wall -Wextra
+DEBUGFLAGS	!= [ $(RELEASE) ] && echo "-O2 -DNODEBUG" || echo "-O0 -DDEBUG"
+CFLAGS		= -Wall -Wextra -g
 DEPFLAGS	= -MT $@ -MMD -MP -MF $@.d
 INCLUDEFLAGS	= -Isrc
 COMPILEFLAGS	=
@@ -28,26 +28,29 @@ include deps.mk
 
 .PHONY: format
 format:
-	@find . -iname '*.[ch]' |\
+	find src tests -iname '*.[ch]' |\
 		xargs -n 10 -P 0 uncrustify -c uncrustify.conf --no-backup -F -
 
 .PHONY: license
 license:
-	@find . -iname '*.[ch]' |\
+	find src tests -iname '*.[ch]' |\
 		xargs -n 10 -P 0 ./scripts/license
 
 .PHONY: docs
 docs:
-	@./scripts/warn-undocumented
-	@doxygen docs/doxygen.conf
+	./scripts/warn-undocumented
+	doxygen docs/doxygen.conf
 
 exgt: $(OBJS)
 	$(COMPILE) $(OBJS) -o $@
 
 .PHONY: clean
 clean:
-	@$(RM) -r build exgt deps.mk
+	$(RM) -r build exgt deps.mk
 
 .PHONY: clean_docs
 clean_docs:
-	@$(RM) -r docs/output
+	$(RM) -r docs/output
+
+.PHONY: clean_all
+clean_all: clean clean_docs

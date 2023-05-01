@@ -1,4 +1,5 @@
-/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* SPDX-License-Identifier: copyleft-next-0.3.1 */
+/* Copyright 2023 Kim Kuparinen < kimi.h.kuparinen@gmail.com > */
 
 #ifndef EXGT_URL_H
 #define EXGT_URL_H
